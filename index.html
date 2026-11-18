@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Festival Bonus BD</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="app-header">
+  <div class="header-inner">
+    <div>
+      <h1 id="app-title" data-i18n="appTitle">Festival Bonus BD</h1>
+      <p class="app-sub" data-i18n="appSub">Festival bonus calculator and tracker for Bangladeshi employees</p>
+    </div>
+    <button id="lang-btn" class="lang-btn" type="button">Bangla</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Sections">
+  <button type="button" class="tab active" data-tab="calculator" data-i18n="tabCalculator">Calculator</button>
+  <button type="button" class="tab" data-tab="tracker" data-i18n="tabTracker">Tracker</button>
+  <button type="button" class="tab" data-tab="compare" data-i18n="tabCompare">Compare</button>
+  <button type="button" class="tab" data-tab="dashboard" data-i18n="tabDashboard">Dashboard</button>
+  <button type="button" class="tab" data-tab="data" data-i18n="tabData">Data</button>
+</nav>
+
+<main class="container">
+
+  <!-- ============ CALCULATOR ============ -->
+  <section id="panel-calculator" class="panel">
+    <div class="card">
+      <h2 data-i18n="calcTitle">Bonus calculator</h2>
+      <p class="muted" data-i18n="calcIntro">Work out each festival bonus under your employer's rule. Nothing is pre-filled - enter your own basic salary and rule.</p>
+
+      <div class="field">
+        <label for="calc-basic" data-i18n="basicLabel">Monthly basic salary (Tk)</label>
+        <input id="calc-basic" type="number" inputmode="decimal" min="0" step="0.01" placeholder="25000" autocomplete="off">
+        <p class="field-error" id="calc-basic-error" hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="calc-rule" data-i18n="ruleLabel">Bonus rule</label>
+        <select id="calc-rule">
+          <option value="multiple" data-i18n="ruleMultiple">Multiple of basic</option>
+          <option value="percent" data-i18n="rulePercent">% of basic</option>
+          <option value="fixed" data-i18n="ruleFixed">Fixed amount</option>
+        </select>
+      </div>
+
+      <div class="field" id="calc-multiple-wrap">
+        <label for="calc-multiple" data-i18n="multipleLabel">Multiple (1 = one basic)</label>
+        <input id="calc-multiple" type="number" inputmode="decimal" min="0" step="0.25" value="1" autocomplete="off">
+        <div class="chip-row">
+          <button type="button" class="chip" data-multiple="1">1&times;</button>
+          <button type="button" class="chip" data-multiple="0.5">0.5&times;</button>
+          <button type="button" class="chip" data-multiple="2">2&times;</button>
+        </div>
+        <p class="field-error" id="calc-rule-error" hidden></p>
+      </div>
+
+      <div class="field" id="calc-percent-wrap" hidden>
+        <label for="calc-percent" data-i18n="percentLabel">Percent of basic</label>
+        <input id="calc-percent" type="number" inputmode="decimal" min="0" step="1" value="100" autocomplete="off">
+      </div>
+
+      <div class="field" id="calc-fixed-wrap" hidden>
+        <label for="calc-fixed" data-i18n="fixedLabel">Fixed amount per festival (Tk)</label>
+        <input id="calc-fixed" type="number" inputmode="decimal" min="0" step="0.01" placeholder="10000" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="calc-festivals" data-i18n="festivalsLabel">Festivals per year</label>
+        <select id="calc-festivals">
+          <option value="2">2</option>
+          <option value="1">1</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label" data-i18n="sectorLabel">Sector preset (suggestion only)</span>
+        <div class="preset-row">
+          <button type="button" class="preset-btn" data-preset="government" data-i18n="sectorGov">Government</button>
+          <button type="button" class="preset-btn" data-preset="private" data-i18n="sectorPrivate">Private</button>
+          <button type="button" class="preset-btn" data-preset="garment" data-i18n="sectorGarment">Garment</button>
+          <button type="button" class="preset-btn" data-preset="other" data-i18n="sectorOther">Other</button>
+        </div>
+        <p class="preset-note" id="preset-note" hidden data-i18n="presetNote">Common practice - confirm with your employer / HR. Bonus rules vary by employer and this is not a legal ruling.</p>
+      </div>
+
+      <div class="results" id="calc-results">
+        <div class="result-row"><span data-i18n="perFestival">Per festival</span><strong id="res-per">-</strong></div>
+        <div class="result-row"><span data-i18n="yearlyTotal">Yearly total</span><strong id="res-yearly">-</strong></div>
+        <div class="result-row"><span data-i18n="monthlyEquiv">Monthly equivalent</span><strong id="res-monthly">-</strong></div>
+      </div>
+      <p class="field-error" id="calc-error" hidden></p>
+
+      <button type="button" class="btn primary" id="use-in-tracker" data-i18n="useInTracker">Use this amount in tracker</button>
+      <p class="muted small" id="copied-msg" hidden data-i18n="copiedToTracker">Per-festival amount placed in the tracker as the expected amount.</p>
+    </div>
+  </section>
+
+  <!-- ============ TRACKER ============ -->
+  <section id="panel-tracker" class="panel" hidden>
+    <div class="card">
+      <h2 data-i18n="trackerTitle">Festival tracker</h2>
+      <p class="muted" data-i18n="trackerIntro">Record each festival's expected and received bonus. Festival dates are yours to enter - Eid dates depend on moon sighting.</p>
+
+      <form id="fest-form" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="fest-name" data-i18n="festNameLabel">Festival name</label>
+            <input id="fest-name" type="text" maxlength="60" list="fest-suggestions" autocomplete="off" placeholder="Eid-ul-Fitr">
+            <datalist id="fest-suggestions">
+              <option value="Eid-ul-Fitr"></option>
+              <option value="Eid-ul-Adha"></option>
+              <option value="Durga Puja"></option>
+              <option value="Christmas"></option>
+              <option value="Buddha Purnima"></option>
+              <option value="Janmashtami"></option>
+              <option value="Easter"></option>
+              <option value="Other"></option>
+            </datalist>
+            <p class="field-error" id="fest-name-error" hidden></p>
+          </div>
+          <div class="field">
+            <label for="fest-date" data-i18n="festDateLabel">Date</label>
+            <input id="fest-date" type="date" autocomplete="off">
+            <p class="field-error" id="fest-date-error" hidden></p>
+          </div>
+          <div class="field">
+            <label for="fest-expected" data-i18n="expectedLabel">Expected amount (Tk)</label>
+            <input id="fest-expected" type="number" inputmode="decimal" min="0" step="0.01" placeholder="25000" autocomplete="off">
+            <p class="field-error" id="fest-expected-error" hidden></p>
+          </div>
+          <div class="field">
+            <label for="fest-received" data-i18n="receivedLabel">Received amount (Tk)</label>
+            <input id="fest-received" type="number" inputmode="decimal" min="0" step="0.01" value="0" autocomplete="off">
+            <p class="field-error" id="fest-received-error" hidden></p>
+          </div>
+          <div class="field">
+            <label for="fest-paid" data-i18n="paidDateLabel">Paid date (optional)</label>
+            <input id="fest-paid" type="date" autocomplete="off">
+            <p class="field-error" id="fest-paid-error" hidden></p>
+          </div>
+        </div>
+        <button type="submit" class="btn primary" id="add-festival-btn" data-i18n="addFestival">Add festival</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div id="fest-empty" class="empty" data-i18n="noFestivals">No festivals added yet.</div>
+      <ul id="fest-list" class="fest-list"></ul>
+    </div>
+  </section>
+
+  <!-- ============ COMPARE ============ -->
+  <section id="panel-compare" class="panel" hidden>
+    <div class="card">
+      <h2 data-i18n="compareTitle">Compare scenarios</h2>
+      <p class="muted" data-i18n="compareIntro">Save up to 3 scenarios (different basic salary or rule) and compare them side by side.</p>
+
+      <form id="scen-form" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="scen-name" data-i18n="scenNameLabel">Scenario name</label>
+            <input id="scen-name" type="text" maxlength="60" autocomplete="off" placeholder="Current job">
+            <p class="field-error" id="scen-name-error" hidden></p>
+          </div>
+          <div class="field">
+            <label for="scen-basic" data-i18n="basicLabel">Monthly basic salary (Tk)</label>
+            <input id="scen-basic" type="number" inputmode="decimal" min="0" step="0.01" placeholder="25000" autocomplete="off">
+            <p class="field-error" id="scen-basic-error" hidden></p>
+          </div>
+          <div class="field">
+            <label for="scen-rule" data-i18n="ruleLabel">Bonus rule</label>
+            <select id="scen-rule">
+              <option value="multiple" data-i18n="ruleMultiple">Multiple of basic</option>
+              <option value="percent" data-i18n="rulePercent">% of basic</option>
+              <option value="fixed" data-i18n="ruleFixed">Fixed amount</option>
+            </select>
+          </div>
+          <div class="field" id="scen-multiple-wrap">
+            <label for="scen-multiple" data-i18n="multipleLabel">Multiple (1 = one basic)</label>
+            <input id="scen-multiple" type="number" inputmode="decimal" min="0" step="0.25" value="1" autocomplete="off">
+          </div>
+          <div class="field" id="scen-percent-wrap" hidden>
+            <label for="scen-percent" data-i18n="percentLabel">Percent of basic</label>
+            <input id="scen-percent" type="number" inputmode="decimal" min="0" step="1" value="100" autocomplete="off">
+          </div>
+          <div class="field" id="scen-fixed-wrap" hidden>
+            <label for="scen-fixed" data-i18n="fixedLabel">Fixed amount per festival (Tk)</label>
+            <input id="scen-fixed" type="number" inputmode="decimal" min="0" step="0.01" placeholder="10000" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="scen-festivals" data-i18n="festivalsLabel">Festivals per year</label>
+            <select id="scen-festivals">
+              <option value="2">2</option>
+              <option value="1">1</option>
+            </select>
+          </div>
+        </div>
+        <p class="field-error" id="scen-error" hidden></p>
+        <button type="submit" class="btn primary" id="add-scenario-btn" data-i18n="addScenario">Add scenario</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div id="scen-empty" class="empty" data-i18n="noScenarios">No scenarios saved yet.</div>
+      <div id="compare-table" class="compare-grid"></div>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section id="panel-dashboard" class="panel" hidden>
+    <div class="card">
+      <h2 data-i18n="dashTitle">Dashboard</h2>
+      <div class="field inline-field">
+        <label for="dash-year" data-i18n="yearLabel">Year</label>
+        <select id="dash-year"></select>
+      </div>
+      <div class="stat-grid">
+        <div class="stat"><span class="stat-label" data-i18n="expectedTotal">Expected total</span><strong id="dash-expected">-</strong></div>
+        <div class="stat"><span class="stat-label" data-i18n="receivedTotal">Received total</span><strong id="dash-received">-</strong></div>
+        <div class="stat"><span class="stat-label" data-i18n="pendingTotal">Pending total</span><strong id="dash-pending">-</strong></div>
+        <div class="stat"><span class="stat-label" data-i18n="nextFestival">Next festival</span><strong id="dash-next">-</strong><span class="stat-sub" id="dash-days"></span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 data-i18n="progressTitle">Progress per festival</h3>
+      <div id="dash-empty" class="empty" data-i18n="noFestivalsYear">No festivals in this year.</div>
+      <div id="dash-progress"></div>
+    </div>
+  </section>
+
+  <!-- ============ DATA ============ -->
+  <section id="panel-data" class="panel" hidden>
+    <div class="card">
+      <h2 data-i18n="dataTitle">Data</h2>
+      <p class="muted" data-i18n="dataIntro">Your data stays in this browser only. Export a backup before clearing it.</p>
+      <button type="button" class="btn" id="export-btn" data-i18n="exportBtn">Download JSON</button>
+      <hr>
+      <div class="field">
+        <label for="import-text" data-i18n="importLabel">Import JSON</label>
+        <textarea id="import-text" rows="6" data-i18n-ph="importPlaceholder" placeholder="Paste exported JSON here..."></textarea>
+      </div>
+      <button type="button" class="btn" id="import-btn" data-i18n="importBtn">Import</button>
+      <p class="field-msg" id="import-msg" hidden></p>
+      <hr>
+      <h3 data-i18n="eraseTitle">Erase all data</h3>
+      <div class="field">
+        <label for="erase-input" data-i18n="eraseHint">Type DELETE to erase everything.</label>
+        <input id="erase-input" type="text" autocomplete="off" placeholder="DELETE">
+      </div>
+      <button type="button" class="btn danger" id="erase-btn" data-i18n="eraseBtn">Erase everything</button>
+      <p class="field-msg" id="erase-msg" hidden></p>
+    </div>
+  </section>
+
+  <footer class="disclaimer" data-i18n="disclaimer">Bonus rules vary by employer - this is not a legal ruling on entitlement. Eid dates depend on moon sighting. Amounts shown are gross; tax treatment varies, so confirm with your employer.</footer>
+</main>
+
+<script src="js/logic.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
